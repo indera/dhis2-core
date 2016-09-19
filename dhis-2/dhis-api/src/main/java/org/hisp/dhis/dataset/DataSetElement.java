@@ -28,14 +28,15 @@ package org.hisp.dhis.dataset;
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-import org.hisp.dhis.common.BaseIdentifiableObject;
-import org.hisp.dhis.common.DxfNamespaces;
-import org.hisp.dhis.dataelement.DataElement;
-import org.hisp.dhis.dataelement.DataElementCategoryCombo;
-
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.dataformat.xml.annotation.JacksonXmlProperty;
+import org.hisp.dhis.common.BaseIdentifiableObject;
+import org.hisp.dhis.common.DxfNamespaces;
+import org.hisp.dhis.common.IdentifiableObject;
+import org.hisp.dhis.common.MergeMode;
+import org.hisp.dhis.dataelement.DataElement;
+import org.hisp.dhis.dataelement.DataElementCategoryCombo;
 
 /**
  * @author Lars Helge Overland
@@ -44,7 +45,7 @@ public class DataSetElement
     extends BaseIdentifiableObject
 {
     private DataSet dataSet;
-    
+
     private DataElement dataElement;
 
     private DataElementCategoryCombo categoryCombo;
@@ -57,7 +58,7 @@ public class DataSetElement
     {
         setAutoFields();
     }
-    
+
     public DataSetElement( DataSet dataSet, DataElement dataElement, DataElementCategoryCombo categoryCombo )
     {
         setAutoFields();
@@ -74,7 +75,7 @@ public class DataSetElement
     {
         return hasCategoryCombo() ? getCategoryCombo() : dataElement.getCategoryCombo();
     }
-    
+
     public boolean hasCategoryCombo()
     {
         return categoryCombo != null;
@@ -83,37 +84,6 @@ public class DataSetElement
     public boolean hasCategoryComboFallback()
     {
         return hasCategoryCombo() || dataElement.hasCategoryCombo();
-    }
-    
-    // -------------------------------------------------------------------------
-    // Hash code and equals
-    // -------------------------------------------------------------------------
-
-    public int hashCode()
-    {        
-        return dataElement.hashCode() * 31 * dataSet.hashCode();
-    }
-    
-    public boolean equals( Object other )
-    {
-        if ( this == other )
-        {
-            return true;
-        }
-
-        if ( other == null )
-        {
-            return false;
-        }
-
-        if ( !getClass().isAssignableFrom( other.getClass() ) )
-        {
-            return false;
-        }
-        
-        DataSetElement element = (DataSetElement) other;
-        
-        return getDataSet().equals( element.getDataSet() ) && getDataElement().equals( element.getDataElement() );
     }
 
     // -------------------------------------------------------------------------
@@ -157,5 +127,29 @@ public class DataSetElement
     public void setCategoryCombo( DataElementCategoryCombo categoryCombo )
     {
         this.categoryCombo = categoryCombo;
+    }
+
+    @Override
+    public void mergeWith( IdentifiableObject other, MergeMode mergeMode )
+    {
+        super.mergeWith( other, mergeMode );
+
+        if ( other.getClass().isInstance( this ) )
+        {
+            DataSetElement dataSetElement = (DataSetElement) other;
+
+            if ( mergeMode.isReplace() )
+            {
+                categoryCombo = dataSetElement.getCategoryCombo();
+                dataElement = dataSetElement.getDataElement();
+                dataSet = dataSetElement.getDataSet();
+            }
+            else if ( mergeMode.isMerge() )
+            {
+                categoryCombo = dataSetElement.getCategoryCombo() == null ? categoryCombo : dataSetElement.getCategoryCombo();
+                dataElement = dataSetElement.getDataElement() == null ? dataElement : dataSetElement.getDataElement();
+                dataSet = dataSetElement.getDataSet() == null ? dataSet : dataSetElement.getDataSet();
+            }
+        }
     }
 }
