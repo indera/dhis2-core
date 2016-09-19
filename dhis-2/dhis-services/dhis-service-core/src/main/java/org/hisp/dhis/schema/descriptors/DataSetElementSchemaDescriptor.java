@@ -51,11 +51,10 @@ public class DataSetElementSchemaDescriptor implements SchemaDescriptor
     {
         Schema schema = new Schema( DataSetElement.class, SINGULAR, PLURAL );
         schema.setRelativeApiEndpoint( API_ENDPOINT );
-        schema.setShareable( true );
         schema.setOrder( 1350 );
 
-        schema.getAuthorities().add( new Authority( AuthorityType.CREATE_PUBLIC, Lists.newArrayList( "F_DATAELEMENT_PUBLIC_ADD" ) ) );
-        schema.getAuthorities().add( new Authority( AuthorityType.CREATE_PRIVATE, Lists.newArrayList( "F_DATAELEMENT_PRIVATE_ADD" ) ) );
+        schema.getAuthorities().add( new Authority( AuthorityType.CREATE,
+            Lists.newArrayList( "F_DATASET_PUBLIC_ADD", "F_DATASET_PRIVATE_ADD" ) ) );
         schema.getAuthorities().add( new Authority( AuthorityType.DELETE, Lists.newArrayList( "F_DATAELEMENT_DELETE" ) ) );
 
         return schema;
